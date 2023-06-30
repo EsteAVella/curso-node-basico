@@ -1,5 +1,6 @@
 const express = require('express')
-const cors = require('cors')
+const cors = require('cors');
+const { dbConnection } = require('../database/config');
 
 class Server {
 
@@ -7,13 +8,19 @@ class Server {
         this.app = express();
         this.port = process.env.PORT
         this.userPath = '/api/user'
-        
+    
+        //CONECCION CON LA BASE DE DATOS
+        this.conectDB();
         //MIDDLEWARES siempre se ejecutan cuando abro el sv 
         this.middlewares();
         //rutas de mi aplicacion
         this.routes();
     }
     
+    async conectDB(){
+        await dbConnection();
+    }
+
     middlewares() {
         
         //CORS

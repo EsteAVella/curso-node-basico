@@ -1,4 +1,7 @@
 const { response, request } = require('express');
+const bcryptjs = require('bcryptjs');
+
+const User = require('../models/user');
 
 const res = response;
 const req = request;
@@ -46,10 +49,27 @@ const userDelete = (req, res) => {
     });
 }
 
-const userPost = (req, res) => {
+const userPost = async(req, res) => {
+    
+    const { name, mail, password, rol } = req.body;
+    const user = new User({ name, mail, password, rol} );
+
+    //verificar si el correo existe asi no encripta al dope
+    const existMail = await User.findOne({mail});
+    if( existMail ){
+        return res.status(400).json({
+            msg:'El correo esta registrado'
+        });
+    }
+    //Encriptacion de la contrasenia
+    const salt = bcryptjs.genSaltSync();
+    user.password = bcryptjs.hashSync( password, salt );
+    //Guardado en la DB
+    await user.save();
+
     res.json({
-        id: 1,
-        msg : 'post API'
+        msg : 'post API',
+        user
     });
 }
 
