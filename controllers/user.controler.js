@@ -6,32 +6,40 @@ const User = require('../models/user');
 const res = response;
 const req = request;
 
-const userGet = (req, res) => {
+const userGet = async(req, res) => {
     
-    const { q, name = 'no name', apikey, page, limit } = req.query;
+    const { limit = 5 , next = 0} = req.query;
+    const query = {state: true}
+    // const { q, name = 'no name', apikey, page, limit } = req.query;
+    
+    const [ total, users ] = await Promise.all([
+        User.countDocuments(query),
+        User.find(query)
+        .skip( Number( next ) )
+        .limit( Number( limit ) ),
+    ]);
 
     res.json({
-        id: 1,
-        msg : 'get API, controller',
-        q,
-        name,
-        apikey,
-        page,
-        limit
+        total,
+        users,
     });
 }
 
-const userPut = (req, res) => {
+const userPut = async(req, res = response) => {
     
     const { id } = req.params
-    const {nombre, edad, estado} = req.body;
+    const {password, google, mail, ...rest } = req.body;
+
+    //TODO validar vs base de datos
+    if ( password ){
+        const salt = bcryptjs.genSaltSync();
+        rest.password = bcryptjs.hashSync( password, salt );
+    }
+    
+    const user = await User.findByIdAndUpdate( id, rest );
 
     res.json({
-        msg : 'put API, controller',
-        id,
-        nombre,
-        edad,
-        estado,
+        user,
     });
 }
 
@@ -42,10 +50,17 @@ const userPatch = (req, res) => {
     });
 }
 
-const userDelete = (req, res) => {
+const userDelete = async(req, res) => {
+    
+    const { id } = req.params;
+    //Borrar de manera fisica........................
+        // const user = await User.findByIdAndDelete( id );
+    //Cambiando de estado
+    const user = await User.findByIdAndUpdate( id, { state : false } );
+
     res.json({
-        id: 1,
-        msg : 'delete API, controller'
+        id,
+        msg : `El usuario con el ${id} borrado con exito`
     });
 }
 
@@ -75,7 +90,6 @@ const userPost = async(req, res) => {
 
 
 module.exports ={
-
     userGet,
     userPut,
     userPatch,
