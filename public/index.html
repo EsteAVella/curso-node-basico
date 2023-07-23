@@ -3,9 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Googlesign-in</title>
 </head>
 <body>
-    <h1>ACCESO DENEGADO under construction</h1>
+    <h1>Google sign-in</h1>
+    <hr>
+    <div id="g_id_onload"
+        data-client_id="476597614586-d6oe1qt00nqct03s8n2f4j35k8sdh1tk.apps.googleusercontent.com"
+        data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin"
+            data-type="standard"
+            data-size="large"
+            data-theme="outline"
+            data-text="sign_in_with"
+            data-shape="rectangular"
+            data-logo_alignment="left">
+    </div>
+    <button id="google_signout">
+      Sign Out
+    </button>
+    <script>
+        window.onload = function () {
+          google.accounts.id.initialize({
+            client_id: '476597614586-d6oe1qt00nqct03s8n2f4j35k8sdh1tk.apps.googleusercontent.com',
+            callback: handleCredentialResponse
+          });
+          const parent = document.getElementById('google_btn');
+          google.accounts.id.renderButton(parent, {theme: "filled_blue"});
+          google.accounts.id.prompt();
+        }
+      </script>
+    <script>
+        function handleCredentialResponse(response){
+            // console.log('id_token', response.credential);
+            const body = { id_token: response.credential }
+
+            fetch('http://localhost:8080/api/auth/google', {
+              method: 'POST',
+              headers:{
+                'Content-Type':'application/json'
+              },
+              body: JSON.stringify(body)
+            })
+              .then( resp => resp.json() )
+              .then( resp =>{
+                localStorage.setItem('mail',resp.user.mail )
+                console.log(resp)
+              })
+              .catch( console.warn );
+
+        }
+      const button = document.getElementById('google_signout');
+      button.onclick = () =>{
+        console.log( google.accounts.id )
+        google.accounts.id.disableAutoSelect()
+
+        google.accounts.id.revoke( localStorage.getItem('mail'), done=>{
+          localStorage.clear();
+          location.reload();
+        });
+      }
+    </script>
+    
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>
