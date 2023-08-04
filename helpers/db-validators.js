@@ -1,3 +1,5 @@
+const { Product } = require('../models');
+const categorie = require('../models/categorie');
 const Rols = require('../models/rols');
 const user = require('../models/user');
 
@@ -26,11 +28,40 @@ const existId = async (id ='') => {
             throw new Error(`El id ${id} no se encuentra registrado`);
         };
 }
-    
+ 
+//Validamos si existe la categoria para agregar
+const existCategorieId = async (id ='') => {
+
+    const existCategorie = await categorie.findById( id );
+        if( !existCategorie ){
+            throw new Error(`El id ${id} no se encuentra registrado`);
+        };
+}
+
+const existProductId = async (id ='') => {
+
+    const existProduct = await Product.findById( id );
+        if( !existProduct ){
+            throw new Error(`El id ${id} no existe`);
+        };
+}
+
+const colectionsOK = async ( colection ='', colections = [] ) => {
+
+    const incudes = colections.includes( colection );
+    if( !incudes ){
+        throw new Error(`la coleccion ${colection} no existe las permitidas son las siguientes ${colections}`);
+    }
+    return true;
+}
+
 
 
 module.exports ={
     isValidate,
     existMail,
     existId,
+    existCategorieId,
+    existProductId,
+    colectionsOK,
 }

@@ -6,10 +6,10 @@ const User = require('../models/user');
 const res = response;
 const req = request;
 
-const userGet = async(req, res) => {
+const userGet = async( req, res ) => {
     
     const { limit = 5 , next = 0} = req.query;
-    const query = {state: true}
+    const query = { state: true };
     // const { q, name = 'no name', apikey, page, limit } = req.query;
     
     const [ total, users ] = await Promise.all([
@@ -28,7 +28,7 @@ const userGet = async(req, res) => {
 const userPut = async(req, res = response) => {
     
     const { id } = req.params
-    const {password, google, mail, ...rest } = req.body;
+    const { password, google, mail, ...rest } = req.body;
 
     //TODO validar vs base de datos
     if ( password ){
